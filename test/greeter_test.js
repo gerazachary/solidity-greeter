@@ -21,29 +21,51 @@ contract("Greeter", (accounts) => {
             const greeter = await GreeterContract.deployed();
             const owner = await greeter.owner();
 
-            assert(owner, "It's not the curren owner");
+            assert(owner, "It's not the current owner");
         });
 
         it("Matches the address that deployed the contract", async () => {
             const greeter = await GreeterContract.deployed();
-            const owner = greeter.owner();
+            const owner = await greeter.owner();
             const expected = accounts[0];
 
-            assert.equal(owner, expected, "Matches address used to deploy contract");
+            assert.equal(owner, expected, "Greeter setter account does not match with original");
         });
     });
 });
 
-contract("Greeter: update greeting", () => {
+contract("Greeter: update greeting", (accounts) => {
     describe("setGreeting(string)", () => {
-        it("Sets greeting based on parameter", async () => {
-            const greeter = await GreeterContract.deployed();
-            const expected = "Hi there!";
+        describe("When message is set by the owner", () => {
+            it("Sets greeting based on parameter", async () => {
+                const greeter = await GreeterContract.deployed();
+                const expected = "Hey, I can modify the message!";
+    
+                await greeter.setGreeting(expected);
+                const actual = await greeter.greet();
+    
+                assert.equal(actual, expected, "Greeting was not updated correctly");
+            });
+        });
 
-            await greeter.setGreeting(expected);
-            const actual = await greeter.greet();
+        describe("When message is set by another account", () => {
+            it("Does not set the greeting", async () => {
+                const assertionErrorMessage = "Greeting shold not be updated by other account than the original";
+                const greeter = await GreeterContract.deployed();
 
-            assert.equal(actual, expected, "Greeting was not updated correctly");
+                try {
+                    await greeter.setGreeting("Mmm... I shouldn't be enabled to set this...", {
+                        from: accounts[1]
+                    });
+                } catch(err) {
+                    const errMessage = "Ownable: function caller is not the owner";
+
+                    assert.equal(err.reason, errMessage, assertionErrorMessage);
+                    return;
+                }
+
+                assert(false, assertionErrorMessage);
+            });
         });
     });
 });

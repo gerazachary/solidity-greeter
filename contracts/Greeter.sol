@@ -4,15 +4,23 @@ contract Greeter {
     string private _greeting = "Hello, World!";
     address private _owner;
 
-    constructor() public {
+    constructor() {
         _owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(
+            msg.sender == _owner,
+            "Ownable: function caller is not the owner"
+        );
+        _;
     }
 
     function greet() external view returns(string memory) {
         return _greeting;
     }
 
-    function setGreeting(string calldata greeting) external {
+    function setGreeting(string calldata greeting) external onlyOwner {
         _greeting = greeting;
     }
 
