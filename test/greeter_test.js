@@ -58,7 +58,7 @@ contract("Greeter: update greeting", (accounts) => {
                         from: accounts[1]
                     });
                 } catch(err) {
-                    const errMessage = "Ownable: function caller is not the owner";
+                    const errMessage = "Ownable: caller is not the owner";
 
                     assert.equal(err.reason, errMessage, assertionErrorMessage);
                     return;
